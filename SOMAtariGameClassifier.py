@@ -9,19 +9,25 @@ from sklearn.datasets import load_breast_cancer
 atariGames = ['Pong-v0', 'Breakout-v0', 'MsPacman-v0', 'SpaceInvaders-v0', 'Seaquest-v0']
 
 def getStateSample(games):
-    observations = []
+    data = []
+    target = []
+    index = 0
     for i in games:
         env = gym.make(i)
         observation = env.reset()
         for t in range(1):
             observation, reward, done, info = env.step(env.action_space.sample())
-            observations.append(observation.reshape(100800))
+            data.append(observation.reshape(100800))
+            target.append(index)
         env.close()
-        print()
-    return np.array(observations)
+        index += 1
+    return np.array(data), np.array(target)
 
-data = getStateSample(atariGames)
+data, target = getStateSample(atariGames)
+
 print (data)
+print (target)
+
 
 som_grid_rows = 30
 som_grid_column = 20
