@@ -15,7 +15,7 @@ def getStateSample(games):
     for i in games:
         env = gym.make(i)
         observation = env.reset()
-        for t in range(1):
+        for t in range(1000):
             observation, reward, done, info = env.step(env.action_space.sample())
             data.append(observation.reshape(100800))
             target.append(index)
