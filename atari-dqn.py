@@ -8,6 +8,8 @@ import torch.optim as optim
 from torch.autograd import Variable
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+import os.path
+from os import path
 
 # hyper parameters
 EPISODES = 200  # number of episodes
@@ -15,7 +17,7 @@ EPS_START = 0.9  # e-greedy threshold start value
 EPS_END = 0.05  # e-greedy threshold end value
 EPS_DECAY = 2000  # e-greedy threshold decay
 GAMMA = 0.99  # Q-learning discount factor
-LR = 0.001  # NN optimizer learning rate
+LR = 0.0001  # NN optimizer learning rate
 HIDDEN_LAYER = 256  # NN hidden layer size
 BATCH_SIZE = 64  # Q-learning batch size
 
@@ -57,8 +59,12 @@ class Network(nn.Module):
 
 
 env = gym.make('Pong-v0').unwrapped
-
+PATH = "./history_data"
 model = Network()
+if (path.exists(PATH)):
+    model.load_state_dict(torch.load(PATH))
+model.eval()
+
 if use_cuda:
     model.cuda()
 memory = ReplayMemory(1000000)
@@ -142,12 +148,11 @@ for e in range(EPISODES):
         env.render()
         action = select_action(FloatTensor([state.reshape(100800)]))
         next_state, reward, done, _ = env.step(action[0, 0].item())
-
-        print (action[0, 0].item(), reward)
+        if (reward != 0):
+            print(reward)
 
         # negative reward when attempt ends
-        if done:
-            reward = -1
+
 
         memory.push((FloatTensor([state.reshape(100800)]),
                      action,  # action is already a tensor
@@ -160,11 +165,14 @@ for e in range(EPISODES):
         steps += 1
 
 
-        if done or steps >= 100:
+        if done :
             # print("Episode {0} finished after {1} steps".format(e, steps))
-            episode_durations.append(steps)
+            #episode_durations.append(steps)
             # plot_durations()
+            print (e, reward)
             break
+    torch.save(model.state_dict(), PATH)
+
 
 # print('Complete')
 # env.render(close=True)
